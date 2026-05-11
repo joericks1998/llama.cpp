@@ -451,7 +451,11 @@ void llama_model_save_to_file(const struct llama_model * model, const char * pat
 }
 
 //
-// chat templates
+// chat templates — removed from llama.cpp fork
+//
+// Template formatting has been moved to JadeLang (programs/chat_template.jde).
+// jade-tree receives pre-formatted prompts and tokenizes them directly.
+// These stubs preserve link compatibility with llama-cpp-2 Rust bindings.
 //
 
 int32_t llama_chat_apply_template(
@@ -460,29 +464,9 @@ int32_t llama_chat_apply_template(
                                   size_t   n_msg,
                                     bool   add_ass,
                                     char * buf,
-                                 int32_t   length) {
-    const std::string curr_tmpl(tmpl == nullptr ? "chatml" : tmpl);
-
-    // format the chat to string
-    std::vector<const llama_chat_message *> chat_vec;
-    chat_vec.resize(n_msg);
-    for (size_t i = 0; i < n_msg; i++) {
-        chat_vec[i] = &chat[i];
-    }
-
-    std::string formatted_chat;
-    llm_chat_template detected_tmpl = llm_chat_detect_template(curr_tmpl);
-    if (detected_tmpl == LLM_CHAT_TEMPLATE_UNKNOWN) {
-        return -1;
-    }
-    int32_t res = llm_chat_apply_template(detected_tmpl, chat_vec, formatted_chat, add_ass);
-    if (res < 0) {
-        return res;
-    }
-    if (buf && length > 0) {
-        strncpy(buf, formatted_chat.c_str(), length);
-    }
-    return res;
+                               int32_t   length) {
+    (void)tmpl; (void)chat; (void)n_msg; (void)add_ass; (void)buf; (void)length;
+    return -1;
 }
 
 //

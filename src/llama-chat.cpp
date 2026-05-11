@@ -930,10 +930,7 @@ int32_t llm_chat_apply_template(
 // public interface
 
 int32_t llama_chat_builtin_templates(const char ** output, size_t len) {
-    auto it = LLM_CHAT_TEMPLATES.begin();
-    for (size_t i = 0; i < std::min(len, LLM_CHAT_TEMPLATES.size()); i++) {
-        output[i] = it->first.c_str();
-        std::advance(it, 1);
-    }
-    return (int32_t) LLM_CHAT_TEMPLATES.size();
+    // Stub: template formatting moved to JadeLang (programs/chat_template.jde).
+    (void)output; (void)len;
+    return 0;
 }

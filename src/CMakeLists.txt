@@ -59,6 +59,16 @@ target_link_libraries(llama PUBLIC ggml)
 # build_moe_ffn seam; the symbols resolve via ggml-cuda -> ggml.
 target_include_directories(llama PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../moe-driver/include)
 
+# ...but the real driver is ONLY compiled into ggml-cuda. On non-CUDA builds
+# (CPU-only `inference`, or any non-CUDA backend) those symbols don't exist, yet
+# the seam (build_moe_ffn) + jaded's moe_driver_init reference them
+# unconditionally. Compile inert host stubs INTO libllama so the same archive
+# that needs the symbols also defines them (no link-order fragility). MoE offload
+# is CUDA-only, so the stubs just report "inactive" and the seam runs stock.
+if (NOT GGML_CUDA)
+    target_sources(llama PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../moe-driver/src/moe_stub.cpp)
+endif()
+
 if (BUILD_SHARED_LIBS)
     set_target_properties(llama PROPERTIES POSITION_INDEPENDENT_CODE ON)
     target_compile_definitions(llama PRIVATE LLAMA_BUILD)

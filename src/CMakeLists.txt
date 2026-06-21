@@ -54,6 +54,11 @@ target_compile_features   (llama PRIVATE cxx_std_17) # don't bump
 
 target_link_libraries(llama PUBLIC ggml)
 
+# JADE MoE expert-offload driver lives in the ggml-cuda target (see
+# ggml/src/ggml-cuda/CMakeLists.txt). llama only needs the header for the
+# build_moe_ffn seam; the symbols resolve via ggml-cuda -> ggml.
+target_include_directories(llama PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../moe-driver/include)
+
 if (BUILD_SHARED_LIBS)
     set_target_properties(llama PROPERTIES POSITION_INDEPENDENT_CODE ON)
     target_compile_definitions(llama PRIVATE LLAMA_BUILD)

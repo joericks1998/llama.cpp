@@ -129,6 +129,18 @@ if (CUDAToolkit_FOUND)
                              ${GGML_SOURCES_CUDA}
                             )
 
+    # JADE MoE expert-offload driver: host policy + driver + ggml graph hook +
+    # the CUDA on-stream pager, all compiled into ggml-cuda so the pager can call
+    # the policy and ggml-cuda's GGML_OP_CUSTOM dispatch can call the pager. The
+    # llama seam (build_moe_ffn) links these symbols via ggml-cuda -> ggml.
+    set(JADE_MOE_DRIVER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/../../../../../moe-driver)
+    target_sources(ggml-cuda PRIVATE
+        ${JADE_MOE_DRIVER_DIR}/src/moe_policy.cpp
+        ${JADE_MOE_DRIVER_DIR}/src/moe_driver.cpp
+        ${JADE_MOE_DRIVER_DIR}/src/graph.cpp
+        ${JADE_MOE_DRIVER_DIR}/src/page.cu)
+    target_include_directories(ggml-cuda PRIVATE ${JADE_MOE_DRIVER_DIR}/include)
+
     add_compile_definitions(GGML_CUDA_PEER_MAX_BATCH_SIZE=${GGML_CUDA_PEER_MAX_BATCH_SIZE})
 
     if (GGML_CUDA_GRAPHS)

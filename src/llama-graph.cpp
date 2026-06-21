@@ -1,5 +1,7 @@
 #include "llama-graph.h"
 
+#include "moe_driver.h" // JADE MoE expert-offload seam (no-op when driver inactive)
+
 #include "llama-impl.h"
 #include "llama-model.h"
 #include "llama-batch.h"
@@ -1654,6 +1656,24 @@ ggml_tensor * llm_graph_context::build_moe_ffn(
         cur = ggml_mul(ctx0, repeated, weights);
         cb(cur, "ffn_moe_weighted", il);
     }
+
+    // ── JADE MoE expert offload (seam) ────────────────────────────────────
+    // When the driver is active, swap the host-resident expert tensors for its
+    // VRAM resident tensors (H+C experts) and remap selected_experts to resident
+    // slot-ids; the stock matmul path below then runs unchanged. NOTE: the
+    // routing `weights` above were gathered with the ORIGINAL expert ids, so the
+    // remap must happen here (after weights, before the matmul). Only the plain
+    // separate-gate/up path (no merged gate_up, bias, or per-expert scale) is
+    // offloaded; anything else falls through to the stock tensors.
+    if (moe_driver_active() && !gate_up_exps && up_exps && gate_exps && down_exps &&
+        !up_exps_b && !gate_exps_b && !up_exps_s && !gate_exps_s) {
+        ggml_tensor * r_gate = nullptr, * r_up = nullptr, * r_down = nullptr, * r_ids = nullptr;
+        if (moe_driver_remap(ctx0, il, gate_exps, up_exps, down_exps, selected_experts,
+                             &r_gate, &r_up, &r_down, &r_ids)) {
+            gate_exps = r_gate; up_exps = r_up; down_exps = r_down; selected_experts = r_ids;
+        }
+    }
+    // ──────────────────────────────────────────────────────────────────────
 
     ggml_tensor * up = nullptr;
     ggml_tensor * experts = nullptr;

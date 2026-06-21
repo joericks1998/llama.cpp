@@ -54,14 +54,14 @@ target_compile_features   (llama PRIVATE cxx_std_17) # don't bump
 
 target_link_libraries(llama PUBLIC ggml)
 
-# JADE MoE expert-offload driver lives in the ggml-cuda target (see
+# MoE expert-offload driver lives in the ggml-cuda target (see
 # ggml/src/ggml-cuda/CMakeLists.txt). llama only needs the header for the
 # build_moe_ffn seam; the symbols resolve via ggml-cuda -> ggml.
 target_include_directories(llama PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../moe-driver/include)
 
 # ...but the real driver is ONLY compiled into ggml-cuda. On non-CUDA builds
-# (CPU-only `inference`, or any non-CUDA backend) those symbols don't exist, yet
-# the seam (build_moe_ffn) + jaded's moe_driver_init reference them
+# (CPU-only inference, or any non-CUDA backend) those symbols don't exist, yet
+# the seam (build_moe_ffn) + the host daemon's moe_driver_init reference them
 # unconditionally. Compile inert host stubs INTO libllama so the same archive
 # that needs the symbols also defines them (no link-order fragility). MoE offload
 # is CUDA-only, so the stubs just report "inactive" and the seam runs stock.

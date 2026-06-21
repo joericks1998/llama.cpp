@@ -1,6 +1,6 @@
 #include "llama-graph.h"
 
-#include "moe_driver.h" // JADE MoE expert-offload seam (no-op when driver inactive)
+#include "moe_driver.h" // MoE expert-offload seam (no-op when driver inactive)
 
 #include "llama-impl.h"
 #include "llama-model.h"
@@ -1657,7 +1657,7 @@ ggml_tensor * llm_graph_context::build_moe_ffn(
         cb(cur, "ffn_moe_weighted", il);
     }
 
-    // ── JADE MoE expert offload (seam) ────────────────────────────────────
+    // ── MoE expert offload (seam) ─────────────────────────────────────────
     // When the driver is active, swap the host-resident expert tensors for its
     // VRAM resident tensors (H+C experts) and remap selected_experts to resident
     // slot-ids; the stock matmul path below then runs unchanged. NOTE: the

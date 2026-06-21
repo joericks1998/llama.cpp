@@ -2788,7 +2788,7 @@ static void ggml_cuda_mul_mat_id(ggml_backend_cuda_context & ctx, ggml_tensor * 
         nb1, nb2, nb3, stream);
 }
 
-// JADE MoE expert-offload: CUDA on-stream pager (page.cu, in this target).
+// MoE expert-offload: CUDA on-stream pager (page.cu, in this target).
 extern "C" void moe_driver_page_cuda(int32_t layer, const int32_t * sel_dev, int32_t * out_dev,
                                      int32_t n_used, int32_t n_tokens, void * stream);
 extern "C" bool moe_driver_active(void);
@@ -3013,7 +3013,7 @@ static bool ggml_cuda_compute_forward(ggml_backend_cuda_context & ctx, struct gg
             ggml_cuda_op_log(ctx, dst);
             break;
         case GGML_OP_CUSTOM:
-            // JADE MoE pager: stays on the CUDA backend (no graph split). The
+            // MoE pager: stays on the CUDA backend (no graph split). The
             // layer index rides in the custom-op userdata (CallbackCtx.layer).
             if (moe_driver_active()) {
                 const struct ggml_custom_op_params * cp =
@@ -3288,7 +3288,7 @@ static bool ggml_cuda_graph_check_compability(ggml_cgraph * cgraph) {
 #endif
         }
 
-        // JADE MoE pager: the GGML_OP_CUSTOM op does host-side classification +
+        // MoE pager: the GGML_OP_CUSTOM op does host-side classification +
         // data-dependent cudaMemcpyAsync + a stream sync, none of which are legal
         // during graph capture. Skip capture (the op still runs on the CUDA
         // stream, so the per-layer backend split is still avoided).
@@ -5364,7 +5364,7 @@ static bool ggml_backend_cuda_device_supports_op(ggml_backend_dev_t dev, const g
             return ggml_is_contiguous(op->src[0]);
             break;
         case GGML_OP_CUSTOM:
-            return true; // JADE MoE pager (dispatched to moe_driver_page_cuda)
+            return true; // MoE pager (dispatched to moe_driver_page_cuda)
         case GGML_OP_NONE:
         case GGML_OP_RESHAPE:
         case GGML_OP_VIEW:

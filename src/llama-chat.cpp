@@ -948,7 +948,7 @@ int32_t llm_chat_apply_template(
 // public interface
 
 int32_t llama_chat_builtin_templates(const char ** output, size_t len) {
-    // Stub: template formatting moved to JadeLang (programs/chat_template.jde).
+    // Stub: template formatting moved out of llama.cpp into the host runtime.
     (void)output; (void)len;
     return 0;
 }

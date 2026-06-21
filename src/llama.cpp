@@ -466,8 +466,8 @@ void llama_model_save_to_file(const struct llama_model * model, const char * pat
 //
 // chat templates — removed from llama.cpp fork
 //
-// Template formatting has been moved to JadeLang (programs/chat_template.jde).
-// jade-tree receives pre-formatted prompts and tokenizes them directly.
+// Template formatting has been moved out of llama.cpp into the host runtime.
+// The host receives pre-formatted prompts and tokenizes them directly.
 // These stubs preserve link compatibility with llama-cpp-2 Rust bindings.
 //
 
